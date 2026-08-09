@@ -1,0 +1,39 @@
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: OCIRepository
+metadata:
+  name: cpf-store
+spec:
+  interval: 5m
+  url: oci://${REGISTRY}/cpf-store
+  ref:
+    tag: "${CPF_STORE_CHART_VERSION}"
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: cpf-storage
+spec:
+  interval: 10m
+  releaseName: cpf-storage
+  chartRef:
+    kind: OCIRepository
+    name: cpf-store
+  dependsOn:
+    - name: nro-service
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    remediation:
+      retries: 3
+  values:
+    replicaCount: ${REPLICA_COUNT}
+    fullnameOverride: cpf-store
+    image:
+      repository: ${REGISTRY}/cpf-storage
+      tag: "${IMAGE_TAG}"
+      pullPolicy: ${IMAGE_PULL_POLICY}
+    config:
+      NEO4J_URI: bolt://cpf-neo4j:7687
+      STORE_URL: http://cpf-store:8080/api/v1/
+      TRUSTED_PARTY_URL: http://nro-service:8020/api/v1/

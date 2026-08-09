@@ -1,0 +1,32 @@
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: OCIRepository
+metadata:
+  name: pa-service
+spec:
+  interval: 5m
+  url: oci://${REGISTRY}/pa-service
+  ref:
+    tag: "${PA_SERVICE_CHART_VERSION}"
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: pa-service
+spec:
+  interval: 10m
+  releaseName: pa-service
+  chartRef:
+    kind: OCIRepository
+    name: pa-service
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    remediation:
+      retries: 3
+  values:
+    replicaCount: ${REPLICA_COUNT}
+    image:
+      repository: ${REGISTRY}/pa-service
+      tag: "${IMAGE_TAG}"
+      pullPolicy: ${IMAGE_PULL_POLICY}

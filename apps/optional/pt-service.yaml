@@ -1,0 +1,32 @@
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: OCIRepository
+metadata:
+  name: pt-service
+spec:
+  interval: 5m
+  url: oci://${REGISTRY}/pt-service
+  ref:
+    tag: "${PT_SERVICE_CHART_VERSION}"
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: pt-service
+spec:
+  interval: 10m
+  releaseName: pt-service
+  chartRef:
+    kind: OCIRepository
+    name: pt-service
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    remediation:
+      retries: 3
+  values:
+    replicaCount: ${REPLICA_COUNT}
+    image:
+      repository: ${REGISTRY}/pt-service
+      tag: "${IMAGE_TAG}"
+      pullPolicy: ${IMAGE_PULL_POLICY}

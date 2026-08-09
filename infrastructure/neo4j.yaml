@@ -1,0 +1,55 @@
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: neo4j
+spec:
+  interval: 1h
+  url: https://helm.neo4j.com/neo4j
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: neo4j
+spec:
+  interval: 10m
+  releaseName: neo4j
+  chart:
+    spec:
+      chart: neo4j
+      version: "${NEO4J_CHART_VERSION}"
+      sourceRef:
+        kind: HelmRepository
+        name: neo4j
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    remediation:
+      retries: 3
+  values:
+    fullnameOverride: cpf-neo4j
+    neo4j:
+      name: cpf-neo4j
+      edition: community
+      passwordFromSecret: neo4j
+      resources:
+        requests:
+          cpu: "500m"
+          memory: "2Gi"
+        limits:
+          cpu: "1"
+          memory: "2Gi"
+    volumes:
+      data:
+        mode: dynamic
+        dynamic:
+          storageClassName: "${STORAGE_CLASS}"
+          accessModes:
+            - ReadWriteOnce
+          requests:
+            storage: ${NEO4J_STORAGE_SIZE}
+    services:
+      neo4j:
+        enabled: true
+        spec:
+          type: ClusterIP

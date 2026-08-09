@@ -1,0 +1,54 @@
+# CPF-GitOps
+
+Desired state of every Common Provenance Framework environment. FluxCD reconciles
+each cluster from an OCI artifact published to Harbor by `.github/workflows/publish.yml`.
+
+## Layout
+
+| Path | Contents |
+| --- | --- |
+| `infrastructure/` | postgres-16, neo4j |
+| `apps/core/` | nro-service, cpf-storage |
+| `apps/optional/` | pt-service, pa-service, reconciled without blocking on readiness |
+| `clusters/<env>/bootstrap.yaml` | per-environment entrypoint, applied once by hand |
+| `clusters/_template/bootstrap.yaml` | starting point for a new environment |
+
+Manifests under `infrastructure/` and `apps/` are environment-agnostic. Everything
+that differs between environments lives in the `cpf-<env>-settings` ConfigMap and is
+injected through Flux `postBuild` substitution.
+
+## Environments
+
+| Environment | Cluster | Namespace |
+| --- | --- | --- |
+| qa | kubernetes-qa | cpf |
+
+## Adding an environment
+
+```
+cp clusters/_template/bootstrap.yaml clusters/dev/bootstrap.yaml
+sed -i 's/ENVIRONMENT_NAME/dev/g; s/ENVIRONMENT_NAMESPACE/cpf-dev/g' clusters/dev/bootstrap.yaml
+```
+
+Adjust the settings ConfigMap, commit, then apply it once against the target cluster:
+
+```
+kubectl apply -f clusters/dev/bootstrap.yaml
+```
+
+Nothing under `infrastructure/` or `apps/` changes.
+
+## Reconciliation order
+
+```
+infrastructure  ->  apps/core  ->  apps/optional
+```
+
+`apps/core` additionally orders `cpf-storage` after `nro-service` through the
+HelmRelease `dependsOn` field.
+
+## Prerequisites per cluster
+
+- FluxCD addon enabled on the Cozystack tenant cluster.
+- Secrets `nro-db`, `neo4j`, `nro-certs` and `org-pki` present in the target namespace.
+- Service Helm charts published to `oci://cerit.io/commonprovenanceframework`.

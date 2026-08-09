@@ -1,0 +1,100 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ENVIRONMENT_NAMESPACE
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cpf-ENVIRONMENT_NAME-settings
+  namespace: cozy-fluxcd
+data:
+  ENVIRONMENT: ENVIRONMENT_NAME
+  REGISTRY: cerit.io/commonprovenanceframework
+  IMAGE_TAG: latest
+  IMAGE_PULL_POLICY: Always
+  REPLICA_COUNT: "1"
+  STORAGE_CLASS: kubevirt
+  POSTGRES_CHART_VERSION: 15.5.38
+  POSTGRES_STORAGE_SIZE: 2Gi
+  NEO4J_CHART_VERSION: 2026.6.0
+  NEO4J_STORAGE_SIZE: 2Gi
+  CPF_STORE_CHART_VERSION: 0.1.0
+  NRO_SERVICE_CHART_VERSION: 0.1.0
+  PA_SERVICE_CHART_VERSION: 0.1.0
+  PT_SERVICE_CHART_VERSION: 0.1.0
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: OCIRepository
+metadata:
+  name: cpf-ENVIRONMENT_NAME
+  namespace: cozy-fluxcd
+spec:
+  interval: 2m
+  url: oci://cerit.io/commonprovenanceframework/cpf-gitops
+  ref:
+    tag: latest
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: cpf-ENVIRONMENT_NAME-infrastructure
+  namespace: cozy-fluxcd
+spec:
+  interval: 10m
+  path: ./infrastructure
+  prune: true
+  wait: true
+  timeout: 15m
+  targetNamespace: ENVIRONMENT_NAMESPACE
+  sourceRef:
+    kind: OCIRepository
+    name: cpf-ENVIRONMENT_NAME
+  postBuild:
+    substituteFrom:
+      - kind: ConfigMap
+        name: cpf-ENVIRONMENT_NAME-settings
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: cpf-ENVIRONMENT_NAME-core
+  namespace: cozy-fluxcd
+spec:
+  interval: 10m
+  path: ./apps/core
+  prune: true
+  wait: true
+  timeout: 15m
+  targetNamespace: ENVIRONMENT_NAMESPACE
+  dependsOn:
+    - name: cpf-ENVIRONMENT_NAME-infrastructure
+  sourceRef:
+    kind: OCIRepository
+    name: cpf-ENVIRONMENT_NAME
+  postBuild:
+    substituteFrom:
+      - kind: ConfigMap
+        name: cpf-ENVIRONMENT_NAME-settings
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: cpf-ENVIRONMENT_NAME-optional
+  namespace: cozy-fluxcd
+spec:
+  interval: 10m
+  path: ./apps/optional
+  prune: true
+  wait: false
+  timeout: 15m
+  targetNamespace: ENVIRONMENT_NAMESPACE
+  dependsOn:
+    - name: cpf-ENVIRONMENT_NAME-core
+  sourceRef:
+    kind: OCIRepository
+    name: cpf-ENVIRONMENT_NAME
+  postBuild:
+    substituteFrom:
+      - kind: ConfigMap
+        name: cpf-ENVIRONMENT_NAME-settings
