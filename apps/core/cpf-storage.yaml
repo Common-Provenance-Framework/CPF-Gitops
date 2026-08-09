@@ -33,6 +33,9 @@ spec:
       repository: ${REGISTRY}/cpf-storage
       tag: "${IMAGE_TAG}"
       pullPolicy: ${IMAGE_PULL_POLICY}
+    extraEnv:
+      - name: SPRING_APPLICATION_JSON
+        value: '{"logging":{"level":{"ACCESS":"WARN"}}}'
     resources:
       requests:
         cpu: 250m
