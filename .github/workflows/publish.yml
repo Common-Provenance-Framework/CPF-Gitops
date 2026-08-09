@@ -37,7 +37,11 @@ jobs:
               clusters/_template/*) continue ;;
             esac
             echo "--> $path"
-            kubectl apply --dry-run=client --validate=false -f "$path" > /dev/null
+            incomplete=$(yq ea '[select(.apiVersion == null or .kind == null or .metadata.name == null)] | length' "$path")
+            if [ "$incomplete" != "0" ]; then
+              echo "$path has $incomplete resource(s) missing apiVersion, kind or metadata.name" >&2
+              exit 1
+            fi
           done
 
   publish:
