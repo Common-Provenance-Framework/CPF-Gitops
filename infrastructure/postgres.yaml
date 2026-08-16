@@ -28,7 +28,7 @@ spec:
     remediation:
       retries: 3
   values:
-    fullnameOverride: nro-postgres
+    fullnameOverride: postgres
     global:
       storageClass: "${STORAGE_CLASS}"
       security:
@@ -41,10 +41,9 @@ spec:
       pullPolicy: IfNotPresent
     auth:
       username: postgres
-      database: trustedServicedb
-      existingSecret: nro-db
+      existingSecret: postgres-superuser
       secretKeys:
-        adminPasswordKey: tp-db-password
+        adminPasswordKey: password
     primary:
       persistence:
         enabled: true

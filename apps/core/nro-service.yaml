@@ -31,8 +31,12 @@ spec:
       pullPolicy: ${IMAGE_PULL_POLICY}
     existingSecret:
       name: nro-db
+      keys:
+        TP_DB_USER: username
+        TP_DB_PASSWORD: password
     certs:
       existingSecret:
         name: nro-certs
     config:
       TP_FQDN: nro-service:8020
+      TP_DB_URL: jdbc:postgresql://postgres:5432/nrodb
