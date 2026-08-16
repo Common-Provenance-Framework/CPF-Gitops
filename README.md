@@ -10,12 +10,16 @@ each cluster from an OCI artifact published to Harbor by `.github/workflows/publ
 | `infrastructure/` | postgres-16, neo4j |
 | `apps/core/` | nro-service, cpf-storage |
 | `apps/optional/` | pt-service, pa-service, reconciled without blocking on readiness |
-| `clusters/<env>/bootstrap.yaml` | per-environment entrypoint, applied once by hand |
+| `clusters/<env>/bootstrap.yaml` | per-environment entrypoint, applied by hand once, reconciled by `cpf-<env>-sync` afterwards |
 | `clusters/_template/bootstrap.yaml` | starting point for a new environment |
 
 Manifests under `infrastructure/` and `apps/` are environment-agnostic. Everything
 that differs between environments lives in the `cpf-<env>-settings` ConfigMap and is
 injected through Flux `postBuild` substitution.
+
+Service chart versions are not pinned: each service `OCIRepository` selects the
+highest published semver, so a chart release reaches every cluster on its own.
+The postgres and neo4j chart versions stay pinned in the settings ConfigMap.
 
 ## Environments
 
@@ -36,12 +40,14 @@ Adjust the settings ConfigMap, commit, then apply it once against the target clu
 kubectl apply -f clusters/dev/bootstrap.yaml
 ```
 
-Nothing under `infrastructure/` or `apps/` changes.
+Nothing under `infrastructure/` or `apps/` changes. Later edits to
+`clusters/dev/bootstrap.yaml` need no second apply; `cpf-dev-sync` reconciles them
+from the published artifact.
 
 ## Reconciliation order
 
 ```
-infrastructure  ->  apps/core  ->  apps/optional
+sync  ->  infrastructure  ->  apps/core  ->  apps/optional
 ```
 
 `apps/core` additionally orders `cpf-storage` after `nro-service` through the

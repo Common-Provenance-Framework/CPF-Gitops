@@ -34,6 +34,21 @@ spec:
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
+  name: cpf-ENVIRONMENT_NAME-sync
+  namespace: cozy-fluxcd
+spec:
+  interval: 10m
+  path: ./clusters/ENVIRONMENT_NAME
+  prune: false
+  wait: false
+  timeout: 5m
+  sourceRef:
+    kind: OCIRepository
+    name: cpf-ENVIRONMENT_NAME
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
   name: cpf-ENVIRONMENT_NAME-infrastructure
   namespace: cozy-fluxcd
 spec:
@@ -43,6 +58,8 @@ spec:
   wait: true
   timeout: 15m
   targetNamespace: ENVIRONMENT_NAMESPACE
+  dependsOn:
+    - name: cpf-ENVIRONMENT_NAME-sync
   sourceRef:
     kind: OCIRepository
     name: cpf-ENVIRONMENT_NAME
