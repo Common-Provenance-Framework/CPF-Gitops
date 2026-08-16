@@ -28,5 +28,4 @@ spec:
     replicaCount: ${REPLICA_COUNT}
     image:
       repository: ${REGISTRY}/pt-service
-      tag: "${IMAGE_TAG}"
       pullPolicy: ${IMAGE_PULL_POLICY}
