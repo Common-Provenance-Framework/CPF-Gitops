@@ -6,7 +6,7 @@ spec:
   interval: 5m
   url: oci://${REGISTRY}/nro-service
   ref:
-    tag: "${NRO_SERVICE_CHART_VERSION}"
+    semver: ">=0.0.0"
 ---
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease

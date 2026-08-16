@@ -6,7 +6,7 @@ spec:
   interval: 5m
   url: oci://${REGISTRY}/pt-service
   ref:
-    tag: "${PT_SERVICE_CHART_VERSION}"
+    semver: ">=0.0.0"
 ---
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
