@@ -1,0 +1,68 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: cpf-org-b
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: cpf-qa-org-b-credentials
+  namespace: cozy-fluxcd
+spec:
+  interval: 10m
+  path: ./credentials
+  prune: true
+  wait: true
+  timeout: 5m
+  targetNamespace: cpf-org-b
+  dependsOn:
+    - name: cpf-qa-sync
+  sourceRef:
+    kind: OCIRepository
+    name: cpf-qa
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: cpf-qa-org-b-infrastructure
+  namespace: cozy-fluxcd
+spec:
+  interval: 10m
+  path: ./infrastructure
+  prune: true
+  wait: true
+  timeout: 15m
+  targetNamespace: cpf-org-b
+  dependsOn:
+    - name: cpf-qa-org-b-credentials
+  sourceRef:
+    kind: OCIRepository
+    name: cpf-qa
+  postBuild:
+    substituteFrom:
+      - kind: ConfigMap
+        name: cpf-qa-settings
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: cpf-qa-org-b-core
+  namespace: cozy-fluxcd
+spec:
+  interval: 10m
+  path: ./apps/core
+  prune: true
+  wait: true
+  timeout: 15m
+  targetNamespace: cpf-org-b
+  dependsOn:
+    - name: cpf-qa-org-b-infrastructure
+  sourceRef:
+    kind: OCIRepository
+    name: cpf-qa
+  postBuild:
+    substitute:
+      NAMESPACE: cpf-org-b
+    substituteFrom:
+      - kind: ConfigMap
+        name: cpf-qa-settings

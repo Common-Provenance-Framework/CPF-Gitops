@@ -29,7 +29,7 @@ The postgres and neo4j chart versions stay pinned in the settings ConfigMap.
 
 | Environment | Cluster | Namespace |
 | --- | --- | --- |
-| qa | kubernetes-qa | cpf, cpf-org-a |
+| qa | kubernetes-qa | cpf, cpf-org-a, cpf-org-b, cpf-org-c |
 
 ## Adding an organization namespace
 
