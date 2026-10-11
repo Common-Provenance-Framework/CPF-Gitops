@@ -10,7 +10,6 @@ each cluster from an OCI artifact published to Harbor by `.github/workflows/publ
 | `credentials/` | Job generating the `postgres-superuser`, `nro-db` and `neo4j` secrets when missing |
 | `infrastructure/` | postgres-16, neo4j, nro-db-bootstrap Job |
 | `apps/core/` | nro-service, cpf-storage |
-| `apps/optional/` | pt-service, pa-service, reconciled without blocking on readiness |
 | `clusters/<env>/bootstrap.yaml` | per-environment entrypoint, applied by hand once, reconciled by `cpf-<env>-sync` afterwards |
 | `clusters/<env>/cpf-<org>.yaml` | organization namespace running its own databases, nro-service and cpf-storage |
 | `clusters/_template/bootstrap.yaml` | starting point for a new environment |
@@ -64,7 +63,7 @@ from the published artifact.
 ## Reconciliation order
 
 ```
-sync  ->  credentials  ->  infrastructure  ->  apps/core  ->  apps/optional
+sync  ->  credentials  ->  infrastructure  ->  apps/core
 ```
 
 `apps/core` additionally orders `cpf-storage` after `nro-service` through the

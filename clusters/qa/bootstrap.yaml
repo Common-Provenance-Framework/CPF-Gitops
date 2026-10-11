@@ -108,25 +108,3 @@ spec:
     substituteFrom:
       - kind: ConfigMap
         name: cpf-qa-settings
----
-apiVersion: kustomize.toolkit.fluxcd.io/v1
-kind: Kustomization
-metadata:
-  name: cpf-qa-optional
-  namespace: cozy-fluxcd
-spec:
-  interval: 10m
-  path: ./apps/optional
-  prune: true
-  wait: false
-  timeout: 15m
-  targetNamespace: cpf
-  dependsOn:
-    - name: cpf-qa-core
-  sourceRef:
-    kind: OCIRepository
-    name: cpf-qa
-  postBuild:
-    substituteFrom:
-      - kind: ConfigMap
-        name: cpf-qa-settings
