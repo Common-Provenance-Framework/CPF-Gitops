@@ -1,0 +1,9 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - suite-trigger.yaml
+configMapGenerator:
+  - name: e2e-release
+    files:
+      - nro-service=release/nro-service.yaml
+      - cpf-store=release/cpf-store.yaml

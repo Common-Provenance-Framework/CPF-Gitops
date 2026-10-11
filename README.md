@@ -10,8 +10,10 @@ each cluster from an OCI artifact published to Harbor by `.github/workflows/publ
 | `credentials/` | Job generating the `postgres-superuser`, `nro-db` and `neo4j` secrets when missing |
 | `infrastructure/` | postgres-16, neo4j, nro-db-bootstrap Job |
 | `apps/core/` | nro-service, cpf-storage |
+| `e2e/` | Job starting the E2E suite, re-created whenever a service chart changes |
 | `clusters/<env>/bootstrap.yaml` | per-environment entrypoint, applied by hand once, reconciled by `cpf-<env>-sync` afterwards |
 | `clusters/<env>/cpf-<org>.yaml` | organization namespace running its own databases, nro-service and cpf-storage |
+| `clusters/<env>/e2e.yaml` | E2E stage, depending on the core stage of every organization namespace |
 | `clusters/_template/bootstrap.yaml` | starting point for a new environment |
 | `clusters/_template/org.yaml` | starting point for a new organization namespace |
 
@@ -42,7 +44,8 @@ Create the namespace and its `nro-certs` secret by hand first, then:
 sed 's/ENVIRONMENT_NAME/qa/g; s/ORG_NAME/org-d/g' clusters/_template/org.yaml > clusters/qa/cpf-org-d.yaml
 ```
 
-Commit it; `cpf-qa-sync` applies it, no manual apply needed. The services are then
+Add `- name: cpf-qa-org-d-core` to the `dependsOn` list in `clusters/qa/e2e.yaml`.
+Commit both; `cpf-qa-sync` applies them, no manual apply needed. The services are then
 reachable as `nro-service.cpf-org-d.svc.cluster.local:8020` and
 `cpf-store.cpf-org-d.svc.cluster.local:8080`.
 
@@ -68,7 +71,12 @@ from the published artifact.
 ```
 environment namespace:   sync  ->  credentials  ->  infrastructure/postgres
 organization namespace:  sync  ->  credentials  ->  infrastructure  ->  apps/core
+all organizations:       apps/core of every organization  ->  e2e
 ```
+
+The e2e stage shares the organization stages' source, so Flux starts it only once
+every organization's core stage has applied the same release revision and its
+HelmReleases are ready. Its Job then calls the orchestrator's `/api/v1/suite/start`.
 
 `apps/core` additionally orders `cpf-storage` after `nro-service` through the
 HelmRelease `dependsOn` field.

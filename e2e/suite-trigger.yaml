@@ -1,0 +1,27 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: suite-trigger
+  annotations:
+    kustomize.toolkit.fluxcd.io/force: enabled
+spec:
+  backoffLimit: 3
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: curl
+          image: docker.io/curlimages/curl:8.11.1
+          command:
+            - /bin/sh
+            - -c
+            - |
+              grep -H appVersion /release/*
+              curl -sSf -X POST http://cpf-e2e-orchestrator.cpf.svc.cluster.local:8080/api/v1/suite/start
+          volumeMounts:
+            - name: release
+              mountPath: /release
+      volumes:
+        - name: release
+          configMap:
+            name: e2e-release

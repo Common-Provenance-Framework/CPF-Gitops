@@ -78,6 +78,10 @@ spec:
           to: "@artifact/charts/nro-service/"
         - from: "@store/**"
           to: "@artifact/charts/cpf-store/"
+        - from: "@nro/nro-service/Chart.yaml"
+          to: "@artifact/e2e/release/nro-service.yaml"
+        - from: "@store/cpf-store/Chart.yaml"
+          to: "@artifact/e2e/release/cpf-store.yaml"
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization

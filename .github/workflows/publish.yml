@@ -25,7 +25,7 @@ jobs:
 
       - name: Build Kustomize Overlays
         run: |
-          for path in credentials infrastructure infrastructure/postgres apps/core; do
+          for path in credentials infrastructure infrastructure/postgres apps/core e2e; do
             echo "--> $path"
             kubectl kustomize "$path" > /dev/null
           done

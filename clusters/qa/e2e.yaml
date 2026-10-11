@@ -1,0 +1,19 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: cpf-qa-e2e
+  namespace: cozy-fluxcd
+spec:
+  interval: 10m
+  path: ./e2e
+  prune: true
+  wait: true
+  timeout: 5m
+  targetNamespace: cpf
+  dependsOn:
+    - name: cpf-qa-org-a-core
+    - name: cpf-qa-org-b-core
+    - name: cpf-qa-org-c-core
+  sourceRef:
+    kind: ExternalArtifact
+    name: cpf-qa-release
