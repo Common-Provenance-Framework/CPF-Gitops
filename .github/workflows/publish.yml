@@ -25,7 +25,7 @@ jobs:
 
       - name: Build Kustomize Overlays
         run: |
-          for path in infrastructure apps/core apps/optional; do
+          for path in credentials infrastructure apps/core apps/optional; do
             echo "--> $path"
             kubectl kustomize "$path" > /dev/null
           done

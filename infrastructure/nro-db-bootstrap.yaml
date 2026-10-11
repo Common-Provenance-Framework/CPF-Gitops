@@ -1,0 +1,72 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: nro-db-bootstrap
+  labels:
+    kustomize.toolkit.fluxcd.io/substitute: disabled
+  annotations:
+    kustomize.toolkit.fluxcd.io/force: enabled
+spec:
+  backoffLimit: 3
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: psql
+          image: docker.io/bitnamilegacy/postgresql:16.6.0-debian-12-r2
+          env:
+            - name: PGHOST
+              value: postgres
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-superuser
+                  key: password
+            - name: NRO_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: nro-db
+                  key: username
+            - name: NRO_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: nro-db
+                  key: password
+            - name: NRO_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: nro-db
+                  key: database
+          command:
+            - /bin/bash
+            - -c
+            - |
+              set -euo pipefail
+
+              admin() {
+                psql -U postgres -d postgres -v ON_ERROR_STOP=1 "$@"
+              }
+
+              until pg_isready -U postgres -q; do
+                echo "waiting for postgres at $PGHOST"
+                sleep 2
+              done
+
+              admin <<SQL
+              DO \$\$
+              BEGIN
+                IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = '${NRO_USERNAME}') THEN
+                  CREATE ROLE "${NRO_USERNAME}" LOGIN;
+                END IF;
+              END
+              \$\$;
+              ALTER ROLE "${NRO_USERNAME}" WITH LOGIN PASSWORD '${NRO_PASSWORD}';
+              SQL
+
+              if admin -tAc "SELECT 1 FROM pg_database WHERE datname = '${NRO_DATABASE}'" | grep -q 1; then
+                admin -c "ALTER DATABASE \"${NRO_DATABASE}\" OWNER TO \"${NRO_USERNAME}\""
+              else
+                admin -c "CREATE DATABASE \"${NRO_DATABASE}\" OWNER \"${NRO_USERNAME}\""
+              fi
+
+              echo "ready: role ${NRO_USERNAME} owns database ${NRO_DATABASE}"

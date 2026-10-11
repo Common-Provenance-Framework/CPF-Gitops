@@ -7,7 +7,8 @@ each cluster from an OCI artifact published to Harbor by `.github/workflows/publ
 
 | Path | Contents |
 | --- | --- |
-| `infrastructure/` | postgres-16, neo4j |
+| `credentials/` | Job generating the `postgres-superuser`, `nro-db` and `neo4j` secrets when missing |
+| `infrastructure/` | postgres-16, neo4j, nro-db-bootstrap Job |
 | `apps/core/` | nro-service, cpf-storage |
 | `apps/optional/` | pt-service, pa-service, reconciled without blocking on readiness |
 | `clusters/<env>/bootstrap.yaml` | per-environment entrypoint, applied by hand once, reconciled by `cpf-<env>-sync` afterwards |
@@ -47,7 +48,7 @@ from the published artifact.
 ## Reconciliation order
 
 ```
-sync  ->  infrastructure  ->  apps/core  ->  apps/optional
+sync  ->  credentials  ->  infrastructure  ->  apps/core  ->  apps/optional
 ```
 
 `apps/core` additionally orders `cpf-storage` after `nro-service` through the
@@ -56,5 +57,5 @@ HelmRelease `dependsOn` field.
 ## Prerequisites per cluster
 
 - FluxCD addon enabled on the Cozystack tenant cluster.
-- Secrets `nro-db`, `neo4j`, `nro-certs` and `org-pki` present in the target namespace.
+- Secrets `nro-certs` and `org-pki` present in the target namespace.
 - Service Helm charts published to `oci://cerit.io/commonprovenanceframework`.

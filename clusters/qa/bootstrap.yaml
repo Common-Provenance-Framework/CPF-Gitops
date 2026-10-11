@@ -48,6 +48,24 @@ spec:
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
+  name: cpf-qa-credentials
+  namespace: cozy-fluxcd
+spec:
+  interval: 10m
+  path: ./credentials
+  prune: true
+  wait: true
+  timeout: 5m
+  targetNamespace: cpf
+  dependsOn:
+    - name: cpf-qa-sync
+  sourceRef:
+    kind: OCIRepository
+    name: cpf-qa
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
   name: cpf-qa-infrastructure
   namespace: cozy-fluxcd
 spec:
@@ -58,7 +76,7 @@ spec:
   timeout: 15m
   targetNamespace: cpf
   dependsOn:
-    - name: cpf-qa-sync
+    - name: cpf-qa-credentials
   sourceRef:
     kind: OCIRepository
     name: cpf-qa
