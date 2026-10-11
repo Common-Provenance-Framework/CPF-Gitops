@@ -1,0 +1,68 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: cpf-ORG_NAME
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: cpf-ENVIRONMENT_NAME-ORG_NAME-credentials
+  namespace: cozy-fluxcd
+spec:
+  interval: 10m
+  path: ./credentials
+  prune: true
+  wait: true
+  timeout: 5m
+  targetNamespace: cpf-ORG_NAME
+  dependsOn:
+    - name: cpf-ENVIRONMENT_NAME-sync
+  sourceRef:
+    kind: OCIRepository
+    name: cpf-ENVIRONMENT_NAME
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: cpf-ENVIRONMENT_NAME-ORG_NAME-infrastructure
+  namespace: cozy-fluxcd
+spec:
+  interval: 10m
+  path: ./infrastructure
+  prune: true
+  wait: true
+  timeout: 15m
+  targetNamespace: cpf-ORG_NAME
+  dependsOn:
+    - name: cpf-ENVIRONMENT_NAME-ORG_NAME-credentials
+  sourceRef:
+    kind: OCIRepository
+    name: cpf-ENVIRONMENT_NAME
+  postBuild:
+    substituteFrom:
+      - kind: ConfigMap
+        name: cpf-ENVIRONMENT_NAME-settings
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: cpf-ENVIRONMENT_NAME-ORG_NAME-core
+  namespace: cozy-fluxcd
+spec:
+  interval: 10m
+  path: ./apps/core
+  prune: true
+  wait: true
+  timeout: 15m
+  targetNamespace: cpf-ORG_NAME
+  dependsOn:
+    - name: cpf-ENVIRONMENT_NAME-ORG_NAME-infrastructure
+  sourceRef:
+    kind: OCIRepository
+    name: cpf-ENVIRONMENT_NAME
+  postBuild:
+    substitute:
+      NAMESPACE: cpf-ORG_NAME
+    substituteFrom:
+      - kind: ConfigMap
+        name: cpf-ENVIRONMENT_NAME-settings

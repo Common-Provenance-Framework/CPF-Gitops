@@ -12,7 +12,9 @@ each cluster from an OCI artifact published to Harbor by `.github/workflows/publ
 | `apps/core/` | nro-service, cpf-storage |
 | `apps/optional/` | pt-service, pa-service, reconciled without blocking on readiness |
 | `clusters/<env>/bootstrap.yaml` | per-environment entrypoint, applied by hand once, reconciled by `cpf-<env>-sync` afterwards |
+| `clusters/<env>/cpf-<org>.yaml` | organization namespace running its own databases, nro-service and cpf-storage |
 | `clusters/_template/bootstrap.yaml` | starting point for a new environment |
+| `clusters/_template/org.yaml` | starting point for a new organization namespace |
 
 Manifests under `infrastructure/` and `apps/` are environment-agnostic. Everything
 that differs between environments lives in the `cpf-<env>-settings` ConfigMap and is
@@ -28,7 +30,19 @@ The postgres and neo4j chart versions stay pinned in the settings ConfigMap.
 
 | Environment | Cluster | Namespace |
 | --- | --- | --- |
-| qa | kubernetes-qa | cpf |
+| qa | kubernetes-qa | cpf, cpf-org-a |
+
+## Adding an organization namespace
+
+Create the namespace and its `nro-certs` secret by hand first, then:
+
+```
+sed 's/ENVIRONMENT_NAME/qa/g; s/ORG_NAME/org-d/g' clusters/_template/org.yaml > clusters/qa/cpf-org-d.yaml
+```
+
+Commit it; `cpf-qa-sync` applies it, no manual apply needed. The services are then
+reachable as `nro-service.cpf-org-d.svc.cluster.local:8020` and
+`cpf-store.cpf-org-d.svc.cluster.local:8080`.
 
 ## Adding an environment
 

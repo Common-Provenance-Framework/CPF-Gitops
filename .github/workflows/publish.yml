@@ -32,7 +32,7 @@ jobs:
 
       - name: Validate Cluster Entrypoints
         run: |
-          for path in clusters/*/bootstrap.yaml; do
+          for path in clusters/*/*.yaml; do
             case "$path" in
               clusters/_template/*) continue ;;
             esac
