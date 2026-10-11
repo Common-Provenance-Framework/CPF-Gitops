@@ -63,7 +63,8 @@ from the published artifact.
 ## Reconciliation order
 
 ```
-sync  ->  credentials  ->  infrastructure  ->  apps/core
+environment namespace:   sync  ->  credentials  ->  infrastructure/postgres
+organization namespace:  sync  ->  credentials  ->  infrastructure  ->  apps/core
 ```
 
 `apps/core` additionally orders `cpf-storage` after `nro-service` through the
@@ -72,5 +73,5 @@ HelmRelease `dependsOn` field.
 ## Prerequisites per cluster
 
 - FluxCD addon enabled on the Cozystack tenant cluster.
-- Secrets `nro-certs` and `org-pki` present in the target namespace.
+- Secret `nro-certs` present in every organization namespace.
 - Service Helm charts published to `oci://cerit.io/commonprovenanceframework`.

@@ -70,7 +70,7 @@ metadata:
   namespace: cozy-fluxcd
 spec:
   interval: 10m
-  path: ./infrastructure
+  path: ./infrastructure/postgres
   prune: true
   wait: true
   timeout: 15m
@@ -81,30 +81,6 @@ spec:
     kind: OCIRepository
     name: cpf-qa
   postBuild:
-    substituteFrom:
-      - kind: ConfigMap
-        name: cpf-qa-settings
----
-apiVersion: kustomize.toolkit.fluxcd.io/v1
-kind: Kustomization
-metadata:
-  name: cpf-qa-core
-  namespace: cozy-fluxcd
-spec:
-  interval: 10m
-  path: ./apps/core
-  prune: true
-  wait: true
-  timeout: 15m
-  targetNamespace: cpf
-  dependsOn:
-    - name: cpf-qa-infrastructure
-  sourceRef:
-    kind: OCIRepository
-    name: cpf-qa
-  postBuild:
-    substitute:
-      NAMESPACE: cpf
     substituteFrom:
       - kind: ConfigMap
         name: cpf-qa-settings
