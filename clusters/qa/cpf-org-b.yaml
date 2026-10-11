@@ -18,8 +18,8 @@ spec:
   dependsOn:
     - name: cpf-qa-sync
   sourceRef:
-    kind: OCIRepository
-    name: cpf-qa
+    kind: ExternalArtifact
+    name: cpf-qa-release
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
@@ -36,8 +36,8 @@ spec:
   dependsOn:
     - name: cpf-qa-org-b-credentials
   sourceRef:
-    kind: OCIRepository
-    name: cpf-qa
+    kind: ExternalArtifact
+    name: cpf-qa-release
   postBuild:
     substituteFrom:
       - kind: ConfigMap
@@ -58,8 +58,8 @@ spec:
   dependsOn:
     - name: cpf-qa-org-b-infrastructure
   sourceRef:
-    kind: OCIRepository
-    name: cpf-qa
+    kind: ExternalArtifact
+    name: cpf-qa-release
   postBuild:
     substitute:
       NAMESPACE: cpf-org-b

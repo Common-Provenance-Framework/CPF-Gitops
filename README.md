@@ -73,6 +73,10 @@ organization namespace:  sync  ->  credentials  ->  infrastructure  ->  apps/cor
 `apps/core` additionally orders `cpf-storage` after `nro-service` through the
 HelmRelease `dependsOn` field.
 
+Organization stages read from the `cpf-<env>-release` ExternalArtifact, which the
+`cpf-<env>-release` ArtifactGenerator builds from the GitOps artifact and both service
+charts. A chart release is therefore a new revision for every organization stage.
+
 ## Prerequisites per cluster
 
 - FluxCD addon enabled on the Cozystack tenant cluster.

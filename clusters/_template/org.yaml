@@ -18,8 +18,8 @@ spec:
   dependsOn:
     - name: cpf-ENVIRONMENT_NAME-sync
   sourceRef:
-    kind: OCIRepository
-    name: cpf-ENVIRONMENT_NAME
+    kind: ExternalArtifact
+    name: cpf-ENVIRONMENT_NAME-release
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
@@ -36,8 +36,8 @@ spec:
   dependsOn:
     - name: cpf-ENVIRONMENT_NAME-ORG_NAME-credentials
   sourceRef:
-    kind: OCIRepository
-    name: cpf-ENVIRONMENT_NAME
+    kind: ExternalArtifact
+    name: cpf-ENVIRONMENT_NAME-release
   postBuild:
     substituteFrom:
       - kind: ConfigMap
@@ -58,8 +58,8 @@ spec:
   dependsOn:
     - name: cpf-ENVIRONMENT_NAME-ORG_NAME-infrastructure
   sourceRef:
-    kind: OCIRepository
-    name: cpf-ENVIRONMENT_NAME
+    kind: ExternalArtifact
+    name: cpf-ENVIRONMENT_NAME-release
   postBuild:
     substitute:
       NAMESPACE: cpf-ORG_NAME
