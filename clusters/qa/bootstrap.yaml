@@ -30,6 +30,28 @@ spec:
   ref:
     tag: latest
 ---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: OCIRepository
+metadata:
+  name: cpf-qa-nro-service
+  namespace: cozy-fluxcd
+spec:
+  interval: 5m
+  url: oci://cerit.io/commonprovenanceframework/nro-service
+  ref:
+    semver: ">=0.0.0"
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: OCIRepository
+metadata:
+  name: cpf-qa-cpf-store
+  namespace: cozy-fluxcd
+spec:
+  interval: 5m
+  url: oci://cerit.io/commonprovenanceframework/cpf-store
+  ref:
+    semver: ">=0.0.0"
+---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:

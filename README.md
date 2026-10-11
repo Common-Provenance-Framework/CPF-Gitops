@@ -23,6 +23,9 @@ Kustomization itself and makes the service URLs fully qualified, e.g.
 
 Service chart versions are not pinned: each service `OCIRepository` selects the
 highest published semver, so a chart release reaches every cluster on its own.
+These `OCIRepository` objects live in `cozy-fluxcd`, defined in `bootstrap.yaml`,
+and are shared by all organization namespaces, so every organization picks up a
+chart release at the same moment.
 The postgres and neo4j chart versions stay pinned in the settings ConfigMap.
 
 ## Environments
