@@ -103,6 +103,8 @@ spec:
     kind: OCIRepository
     name: cpf-qa
   postBuild:
+    substitute:
+      NAMESPACE: cpf
     substituteFrom:
       - kind: ConfigMap
         name: cpf-qa-settings

@@ -38,5 +38,5 @@ spec:
       existingSecret:
         name: nro-certs
     config:
-      TP_FQDN: nro-service:8020
+      TP_FQDN: nro-service.${NAMESPACE}.svc.cluster.local:8020
       TP_DB_URL: jdbc:postgresql://postgres:5432/nrodb

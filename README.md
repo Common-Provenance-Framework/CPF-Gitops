@@ -16,7 +16,9 @@ each cluster from an OCI artifact published to Harbor by `.github/workflows/publ
 
 Manifests under `infrastructure/` and `apps/` are environment-agnostic. Everything
 that differs between environments lives in the `cpf-<env>-settings` ConfigMap and is
-injected through Flux `postBuild` substitution.
+injected through Flux `postBuild` substitution. `NAMESPACE` is set on the `apps/core`
+Kustomization itself and makes the service URLs fully qualified, e.g.
+`http://cpf-store.<namespace>.svc.cluster.local:8080`.
 
 Service chart versions are not pinned: each service `OCIRepository` selects the
 highest published semver, so a chart release reaches every cluster on its own.

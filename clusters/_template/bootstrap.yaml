@@ -103,6 +103,8 @@ spec:
     kind: OCIRepository
     name: cpf-ENVIRONMENT_NAME
   postBuild:
+    substitute:
+      NAMESPACE: ENVIRONMENT_NAMESPACE
     substituteFrom:
       - kind: ConfigMap
         name: cpf-ENVIRONMENT_NAME-settings
